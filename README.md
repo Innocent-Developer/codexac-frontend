@@ -176,7 +176,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Abubakkar Sajid** - *Initial work* - [Innocent-Develope](https://github.com/Innocent-Developer)
+- **Abubakkar Sajid** - *Software Developer* - [Innocent-Develope](https://github.com/Innocent-Developer)
 
 ## 🙏 Acknowledgments
 

@@ -27,7 +27,7 @@ const Home = () => {
     const fetchUserData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:4000/api/getUserByUid/${uid}`
+          `${process.env.REACT_APP_API_URL}/api/getUserByUid/${uid}`
         );
         const data = await res.json();
 
