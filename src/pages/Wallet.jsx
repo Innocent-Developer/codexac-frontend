@@ -108,20 +108,48 @@ const WalletPage = () => {
   // Handle send transaction
   const handleSendTransaction = async () => {
     if (!recipientAddress || !amount) {
-      alert("Please fill in all fields");
+      setTransactionStatus({ 
+        loading: false, 
+        error: "Please fill in all fields" 
+      });
       return;
     }
 
     setTransactionStatus({ loading: true, error: null });
     try {
-      // Add your transaction logic here
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated delay
-      setTransactionStatus({ loading: false, error: null });
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transfer/coin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
+        },
+        body: JSON.stringify({
+          fromAddress: userData.address,
+          toAddress: recipientAddress,
+          amount: Number(amount)
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Transaction failed');
+      }
+
+      // Reset form and close modal on success
       setShowModal(false);
-      setRecipientAddress("");
-      setAmount("");
+      setRecipientAddress('');
+      setAmount('');
+      setTransactionStatus({ loading: false, error: null });
+
+      // Optional: Show success message
+      alert('Transaction successful!');
+
     } catch (error) {
-      setTransactionStatus({ loading: false, error: error.message });
+      setTransactionStatus({ 
+        loading: false, 
+        error: error.message || 'Failed to send transaction' 
+      });
     }
   };
 
