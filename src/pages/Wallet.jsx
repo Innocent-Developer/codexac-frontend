@@ -25,7 +25,7 @@ const WalletPage = () => {
         if (!uid) return;
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/getUserByUid/${uid}`
+          `https://api.funchatparty.online/api/getUserByUid/${uid}`
         );
 
         const data = await response.json();
@@ -117,7 +117,7 @@ const WalletPage = () => {
 
     setTransactionStatus({ loading: true, error: null });
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transfer/coin`, {
+      const response = await fetch(`https://api.funchatparty.online/api/transfer/coin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
