@@ -27,7 +27,7 @@ const Home = () => {
     const fetchUserData = async () => {
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/getUserByUid/${uid}`
+          `https://api.funchatparty.online/api/getUserByUid/${uid}`
         );
         const data = await res.json();
 
