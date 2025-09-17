@@ -1,70 +1,193 @@
-# Getting Started with Create React App
+# Codexac Mining App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern web application for crypto mining management with real-time tracking, wallet management, and mining controls.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Real-time Dashboard**
+  - Live mining statistics
+  - Current hash rate monitoring
+  - Mining rewards tracking
 
-### `npm start`
+- **Secure Wallet Management**
+  - QR code generation for addresses
+  - QR code scanning for transfers
+  - Transaction history
+  - Real-time balance updates
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **User Authentication**
+  - Secure login/signup
+  - JWT token-based authentication
+  - Protected routes
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Mining Controls**
+  - Start/Stop mining operations
+  - Mining pool selection
+  - Performance metrics
 
-### `npm test`
+## 🛠️ Technology Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Frontend**
+  - React.js
+  - Tailwind CSS
+  - HTML5-QRCode
+  - Lucide Icons
+  - React Router DOM
 
-### `npm run build`
+- **Backend**
+  - Node.js
+  - Express.js
+  - MongoDB
+  - JWT Authentication
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 📦 Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. **Clone the repository**
+```bash
+git clone https://github.com/Innocent-Developer/codexac-frontend
+cd crypto-mining-app
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. **Install dependencies**
+```bash
+# Install frontend dependencies
+cd frontend
+npm install
 
-### `npm run eject`
+# Install backend dependencies
+cd ../backend
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Environment Setup**
+Create a `.env` file in the backend directory:
+```env
+PORT=4000
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. **Start the application**
+```bash
+# Start backend server
+cd backend
+npm start
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# Start frontend development server
+cd frontend
+npm start
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🔧 Configuration
 
-## Learn More
+### Frontend Configuration
+- Port: 3000 (default)
+- API URL: http://localhost:4000 (configurable)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Backend Configuration
+- Port: 4000 (configurable)
+- Database: MongoDB
+- Authentication: JWT
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📱 Screenshots
 
-### Code Splitting
+![Dashboard](./screenshots/dashboard.png)
+![Wallet](./screenshots/wallet.png)
+![Mining](./screenshots/mining.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🔒 Security Features
 
-### Analyzing the Bundle Size
+- JWT token authentication
+- Protected API routes
+- Secure wallet transactions
+- Password hashing
+- Rate limiting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🚦 API Routes
 
-### Making a Progressive Web App
+### Authentication
+- POST `/api/auth/register` - User registration
+- POST `/api/auth/login` - User login
+- GET `/api/auth/verify` - Token verification
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Wallet
+- GET `/api/wallet/balance` - Get wallet balance
+- POST `/api/wallet/transfer` - Transfer funds
+- GET `/api/wallet/transactions` - Get transaction history
 
-### Advanced Configuration
+### Mining
+- GET `/api/mining/stats` - Get mining statistics
+- POST `/api/mining/start` - Start mining
+- POST `/api/mining/stop` - Stop mining
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 💻 Development
 
-### Deployment
+### Prerequisites
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- MongoDB
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Running Tests
+```bash
+# Run frontend tests
+cd frontend
+npm test
 
-### `npm run build` fails to minify
+# Run backend tests
+cd backend
+npm test
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Building for Production
+```bash
+# Build frontend
+cd frontend
+npm run build
+
+# Build backend
+cd backend
+npm run build
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 🐛 Known Issues
+
+- Issue #1: Description of known issue
+- Issue #2: Description of known issue
+
+## 🔮 Future Updates
+
+- [ ] Mobile application
+- [ ] Multiple wallet support
+- [ ] Advanced mining analytics
+- [ ] Automated trading features
+- [ ] Mining pool integration
+
+## 👥 Authors
+
+- **Abubakkar Sajid** - *Initial work* - [Innocent-Develope](https://github.com/Innocent-Developer)
+
+## 🙏 Acknowledgments
+
+- Hat tip to anyone whose code was used
+- Inspiration
+- etc
+
+## 📞 Support
+
+For support, email abubakkarsajid4@gmail.com or join our Slack channel.
+
+---
+
+Made with ❤️ by [Abubakkar sajid](https://abubakkar.online)
