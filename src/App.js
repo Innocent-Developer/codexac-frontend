@@ -6,6 +6,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import HomePage from "./pages/Home.jsx";
 import Signup from "./components/signup.jsx";
 import WalletPage from "./pages/Wallet.jsx";
+import MiningPage from "./pages/MiningPages.jsx";
 
 // Example Pages
 const Home = () => <h1 className="text-2xl">Home Page</h1>;
@@ -58,6 +59,24 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/mining"
+                element={
+                  <ProtectedRoute>
+                    <MiningPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/kyc"
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Fallback Route */}
+              <Route path="*" element={<h1 className="text-2xl">404 Not Found</h1>} />
             </Routes>
           </div>
         </div>

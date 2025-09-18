@@ -1,36 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import Loader from "../components/Loader";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, user } = useContext(AuthContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Check if user is already logged in (user data in localStorage)
+  // Redirect if already logged in
   useEffect(() => {
-    const user = localStorage.getItem("user");
     if (user) {
-      try {
-        const userObj = JSON.parse(user);
-        // Check for a valid token and user object (basic check)
-        if (
-          userObj &&
-          userObj.token &&
-          userObj.user &&
-          userObj.user.email &&
-          userObj.user.id
-        ) {
-          navigate("/", { replace: true });
-        }
-      } catch (e) {
-        // If parsing fails, remove invalid user data
-        localStorage.removeItem("user");
-      }
+      navigate("/", { replace: true });
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +25,7 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await fetch(`https://api.funchatparty.online/api/login`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -47,11 +34,9 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      // Save user in localStorage
-      localStorage.setItem("user", JSON.stringify(data));
-
-      // Navigate to /home after successful login
-      navigate("/home", { replace: true });
+      // Use context login function
+      login(data);
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.message || "Invalid credentials");
     } finally {
@@ -63,7 +48,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left Side - Welcome Section */}
+      {/* Left Side */}
       <div className="hidden md:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-blue-900 via-gray-900 to-gray-950 text-white relative overflow-hidden">
         <div
           className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none"
@@ -71,13 +56,11 @@ const Login = () => {
             background:
               "radial-gradient(circle at 60% 40%, #2563eb 0%, transparent 70%)",
           }}
-        ></div>
+        />
         <div className="z-10 text-center px-10">
-          <h1 className="text-5xl font-extrabold mb-4 tracking-tight drop-shadow-lg">
-            Welcome Back!
-          </h1>
+          <h1 className="text-5xl font-extrabold mb-4">Welcome Back!</h1>
           <p className="text-lg mb-8 text-blue-100">
-            Sign in to access your dashboard and continue your journey with{" "}
+            Sign in to access your dashboard and continue with{" "}
             <span className="font-bold text-blue-400">Codexac</span>.
           </p>
           <img
@@ -109,12 +92,10 @@ const Login = () => {
               />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold mb-6 text-center text-blue-400 mt-8 tracking-wide">
+          <h2 className="text-3xl font-bold mb-6 text-center text-blue-400 mt-8">
             Sign In
           </h2>
-          {error && (
-            <p className="text-red-500 mb-4 text-center">{error}</p>
-          )}
+          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
           <div className="mb-5">
             <label

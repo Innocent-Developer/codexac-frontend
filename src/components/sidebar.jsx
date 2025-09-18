@@ -11,8 +11,9 @@ const Sidebar = () => {
     { name: "Home", icon: <Home size={20} />, path: "/" },
     { name: "Leaderboard", icon: <BarChart size={20} />, path: "/leaderboard" },
     { name: "Wallet", icon: <Wallet size={20} />, path: "/wallet" },
+    {name:"Mining", icon:<HammerIcon size={20} />, path:"/mining" },
     {name: "kyc", icon:<User size={20} />, path: "/kyc" },
-    {name:"Mining", icon:<HammerIcon size={20} />, path:"/mining" }
+    
 
   ];
 
