@@ -7,6 +7,8 @@ import HomePage from "./pages/Home.jsx";
 import Signup from "./components/signup.jsx";
 import WalletPage from "./pages/Wallet.jsx";
 import MiningPage from "./pages/MiningPages.jsx";
+import KycPage from "./pages/KycPage.jsx";
+import UnderMaintenance from "./pages/UnderMaintance.jsx";
 
 // Example Pages
 const Home = () => <h1 className="text-2xl">Home Page</h1>;
@@ -71,7 +73,7 @@ function App() {
                 path="/kyc"
                 element={
                   <ProtectedRoute>
-                    <HomePage />
+                    <UnderMaintenance />
                   </ProtectedRoute>
                 }
               />

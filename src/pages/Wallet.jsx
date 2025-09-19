@@ -16,6 +16,22 @@ const WalletPage = () => {
   // Add new state for transaction status
   const [transactionStatus, setTransactionStatus] = useState({ loading: false, error: null });
 
+  // Add new state for transactions
+  const [transactions, setTransactions] = useState([]);
+
+  // Add this function to format date
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  // Add this function to format address
+  const formatAddress = (address, currentUserAddress) => {
+    if (address === currentUserAddress) {
+      return "You";
+    }
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -24,21 +40,27 @@ const WalletPage = () => {
 
         if (!uid) return;
 
-        const response = await fetch(
+        // Fetch user data
+        const userResponse = await fetch(
           `https://api.funchatparty.online/api/getUserByUid/${uid}`
         );
+        const userData = await userResponse.json();
+        setUserData(userData.user);
 
-        const data = await response.json();
-        setUserData(data.user);
+        // Fetch transactions
+        const txResponse = await fetch(
+          `https://api.funchatparty.online/api/transactions/ua/${userData.user.address}`
+        );
+        const txData = await txResponse.json();
+        setTransactions(txData);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
 
     fetchUserData();
-
     const interval = setInterval(fetchUserData, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -262,9 +284,63 @@ const WalletPage = () => {
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4">Recent Transactions</h3>
         <div className="space-y-4">
-          <div className="bg-gray-800/30 rounded-xl p-4">
-            <p className="text-gray-400 text-center">No transactions yet</p>
-          </div>
+          {transactions.length === 0 ? (
+            <div className="bg-gray-800/30 rounded-xl p-4">
+              <p className="text-gray-400 text-center">No transactions yet</p>
+            </div>
+          ) : (
+            transactions.map((tx) => (
+              <div
+                key={tx._id}
+                className="bg-gray-800/30 rounded-xl p-4 hover:bg-gray-800/40 transition-all"
+              >
+                <div className="flex flex-col sm:flex-row justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {tx.from === userData?.address ? (
+                      <ArrowUpRight className="text-red-400" />
+                    ) : (
+                      <ArrowDownLeft className="text-green-400" />
+                    )}
+                    <div>
+                      <p className="text-sm text-gray-400">
+                        {tx.from === userData?.address ? "Sent to" : "Received from"}
+                      </p>
+                      <p className="font-mono">
+                        {formatAddress(
+                          tx.from === userData?.address ? tx.to : tx.from,
+                          userData?.address
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-bold ${
+                      tx.from === userData?.address 
+                        ? "text-red-400" 
+                        : "text-green-400"
+                    }`}>
+                      {tx.from === userData?.address ? "-" : "+"}
+                      {tx.amount} CXAC
+                    </p>
+                    <p className="text-xs text-gray-400">{formatDate(tx.createdAt)}</p>
+                  </div>
+                </div>
+                <div className="mt-2 pt-2 border-t border-gray-700/50">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Block #{tx.blockNumber}</span>
+                    <a
+                      href={`https://explorer.codexac.com/tx/${tx.transactionHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-blue-400 transition-colors"
+                    >
+                      View on Explorer →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -379,6 +455,7 @@ const WalletPage = () => {
         </div>
       )}
     </div>
+
   );
 };
 
