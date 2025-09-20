@@ -20,6 +20,7 @@ module.exports = {
         'spin-reverse-slow': 'spin-reverse 3s linear infinite',
         float: 'float 3s infinite',
         fadeIn: 'fadeIn 0.3s ease-out',
+
       },
     },
   },

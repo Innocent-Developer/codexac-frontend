@@ -9,11 +9,8 @@ import WalletPage from "./pages/Wallet.jsx";
 import MiningPage from "./pages/MiningPages.jsx";
 import KycPage from "./pages/KycPage.jsx";
 import UnderMaintenance from "./pages/UnderMaintance.jsx";
-
-// Example Pages
-
-const Leaderboard = () => <h1 className="text-2xl">Leaderboard</h1>;
-const Wallet = () => <WalletPage />;
+import LeaderBoard from "./pages/LeaderBoard.jsx";
+import Explorer from "./pages/explorer";
 
 function App() {
   return (
@@ -21,12 +18,13 @@ function App() {
       <Router>
         <div className="flex">
           <Sidebar />
-          {/* Main content - Added margin-left for sidebar width */}
+          {/* Main content */}
           <div className="flex-1 ml-0 md:ml-[280px] bg-gray-950 text-white min-h-screen p-4 md:p-6">
             <Routes>
-              {/* Public Route */}
+              {/* Public Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Signup />} />
+              <Route path="/leaderboard" element={<LeaderBoard />} />
 
               {/* Protected Routes */}
               <Route
@@ -46,18 +44,10 @@ function App() {
                 }
               />
               <Route
-                path="/leaderboard"
-                element={
-                  <ProtectedRoute>
-                    <UnderMaintenance />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/wallet"
                 element={
                   <ProtectedRoute>
-                    <Wallet />
+                    <WalletPage />
                   </ProtectedRoute>
                 }
               />
@@ -77,6 +67,10 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/explorer" element={<Explorer />} />
+              <Route path="/explorer/tx/:hash" element={<Explorer />} />
+              <Route path="/explorer/block/:number" element={<Explorer />} />
+              <Route path="/explorer/address/:address" element={<Explorer />} />
               {/* Fallback Route */}
               <Route path="*" element={<h1 className="text-2xl">404 Not Found</h1>} />
             </Routes>

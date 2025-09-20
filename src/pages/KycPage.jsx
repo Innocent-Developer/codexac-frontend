@@ -4,8 +4,9 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  X,
   ShieldCheck,
+  Clock,
+  X,
 } from "lucide-react";
 import Modal from "../components/model";
 
@@ -38,9 +39,12 @@ const KycPage = () => {
     livePhoto: false,
   });
 
+  const [kycStatus, setKycStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+
   // Get user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
-  const uid = user?.user?.uid;
+  const uid = user?.user?.uid || user?.uid;
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -187,6 +191,102 @@ const KycPage = () => {
       setLoading(false);
     }
   };
+
+  // Check KYC status on component mount
+  useEffect(() => {
+    const checkKycStatus = async () => {
+      try {
+        const response = await fetch(
+          `http://api.funchatparty.online/api/kyc/status/${uid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setKycStatus(data.status);
+        }
+      } catch (error) {
+        console.error("Error checking KYC status:", error);
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+
+    if (uid) {
+      checkKycStatus();
+    }
+  }, [uid, user.token]);
+
+  // Show loading state while checking KYC status
+  if (statusLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="animate-spin" size={24} />
+          <span>Checking KYC status...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show pending status page if KYC is already submitted
+  if (kycStatus === "pending") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
+        <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-sm rounded-2xl p-8 text-center">
+          <div className="flex justify-center mb-6">
+            <Clock className="text-yellow-400 w-16 h-16" />
+          </div>
+          <h1 className="text-3xl font-bold mb-4">
+            KYC Verification Pending
+          </h1>
+          <p className="text-gray-400 mb-6">
+            Your KYC application has been submitted and is currently under review.
+            Our team will process your application within 24-48 hours.
+          </p>
+
+          <div className="bg-gray-800/50 rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Verification Status</h2>
+            <div className="flex items-center justify-center gap-2 text-yellow-400">
+              <Clock size={20} className="animate-pulse" />
+              <span>Under Review</span>
+            </div>
+          </div>
+
+          <div className="text-left bg-blue-500/10 rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-3 text-blue-400">
+              What happens next?
+            </h3>
+            <ul className="space-y-3 text-gray-400">
+              <li className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                <span>We'll review your submitted documents thoroughly</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                <span>You'll receive an email notification once verified</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                <span>Your account status will be updated automatically</span>
+              </li>
+            </ul>
+          </div>
+
+          <button
+            onClick={() => (window.location.href = "/dashboard")}
+            className="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
@@ -436,7 +536,7 @@ const KycPage = () => {
               <div className="space-y-4">
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <label className="block text-sm text-gray-400 mb-3 flex items-center justify-between">
-                    <span>Live Photo (Optional)</span>
+                    <span>Live Photo</span>
                     {uploadLoading.livePhoto && (
                       <Loader2 className="animate-spin" size={16} />
                     )}
