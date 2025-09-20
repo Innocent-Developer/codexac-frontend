@@ -11,7 +11,7 @@ import KycPage from "./pages/KycPage.jsx";
 import UnderMaintenance from "./pages/UnderMaintance.jsx";
 
 // Example Pages
-const Home = () => <h1 className="text-2xl">Home Page</h1>;
+
 const Leaderboard = () => <h1 className="text-2xl">Leaderboard</h1>;
 const Wallet = () => <WalletPage />;
 
@@ -49,7 +49,7 @@ function App() {
                 path="/leaderboard"
                 element={
                   <ProtectedRoute>
-                    <Leaderboard />
+                    <UnderMaintenance />
                   </ProtectedRoute>
                 }
               />
@@ -73,7 +73,7 @@ function App() {
                 path="/kyc"
                 element={
                   <ProtectedRoute>
-                    <UnderMaintenance />
+                    <KycPage />
                   </ProtectedRoute>
                 }
               />

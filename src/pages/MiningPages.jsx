@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Play, TrendingUp, Clock, Award, AlertCircle } from 'lucide-react';
+import { Play, TrendingUp, Clock, Award, AlertCircle, Loader2, Coins } from 'lucide-react';
+import MiningAnimation from '../components/animations';
 
 const MiningPage = () => {
   const [miningStatus, setMiningStatus] = useState(false);
@@ -11,6 +12,7 @@ const MiningPage = () => {
   const [error, setError] = useState(null);
   const [cooldownInfo, setCooldownInfo] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [showAnimation, setShowAnimation] = useState(false);
 
   // Get user from localStorage
   const user = JSON.parse(localStorage.getItem('user'));
@@ -65,6 +67,40 @@ const MiningPage = () => {
     }
   }, [uid, user.token]);
 
+  // Add this function at the top of your component to get the real IP
+  const getPublicIP = async () => {
+    try {
+      // Try multiple IP services in case one fails
+      const services = [
+        'https://api.ipify.org?format=json',
+        'https://api.ip.sb/ip',
+        'https://api.myip.com'
+      ];
+
+      for (const service of services) {
+        try {
+          const response = await fetch(service);
+          if (!response.ok) continue;
+          
+          if (service.includes('ipify')) {
+            const data = await response.json();
+            return data.ip;
+          } else {
+            const ip = await response.text();
+            return ip.trim();
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      throw new Error('Failed to get IP address');
+    } catch (error) {
+      console.error('IP fetch error:', error);
+      return null;
+    }
+  };
+
+  // Update the startMining function
   const startMining = async () => {
     if (!userId) {
       setError('User ID is required. Please login again.');
@@ -76,6 +112,15 @@ const MiningPage = () => {
     }
 
     try {
+      setShowAnimation(true);
+      
+      // Get public IP address first
+      const ipaddress = await getPublicIP();
+      
+      if (!ipaddress) {
+        throw new Error('Could not determine your IP address. Please try again.');
+      }
+
       setError(null);
       const response = await fetch('https://api.funchatparty.online/api/mining/coin', {
         method: 'POST',
@@ -85,9 +130,7 @@ const MiningPage = () => {
         },
         body: JSON.stringify({ 
           userId,
-          ipaddress: await fetch('https://api.ipify.org?format=json')
-            .then(res => res.json())
-            .then(data => data.ip)
+          ipaddress // Send the clean IP address
         })
       });
 
@@ -106,7 +149,6 @@ const MiningPage = () => {
         return;
       }
 
-      // Update stats after successful mining
       setMiningStatus(true);
       setMiningStats(prev => ({
         ...prev,
@@ -130,6 +172,11 @@ const MiningPage = () => {
     } catch (err) {
       setError(err.message);
       setMiningStatus(false);
+    } finally {
+      // Hide animation after 5 seconds
+      setTimeout(() => {
+        setShowAnimation(false);
+      }, 5000);
     }
   };
 
@@ -179,6 +226,9 @@ const MiningPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
+      {/* Show animation only when showAnimation is true */}
+      {showAnimation && <MiningAnimation />}
+      
       <div className="max-w-4xl mx-auto">
         {/* Mining Control Card */}
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-6">
@@ -214,8 +264,22 @@ const MiningPage = () => {
                     : "bg-green-500 hover:bg-green-600"
               }`}
             >
-              <Play size={20} className={miningStatus ? "animate-pulse" : ""} />
-              {miningStatus ? "Mining in Progress" : "Start Mining"}
+              {cooldownInfo ? (
+                <>
+                  <Clock size={20} />
+                  Cooldown Active
+                </>
+              ) : miningStatus ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  Mining in Progress
+                </>
+              ) : (
+                <>
+                  <Play size={20} />
+                  Start Mining
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -223,7 +287,7 @@ const MiningPage = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* Hash Rate */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 transform transition-all hover:scale-105">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="text-blue-400" />
               <h2 className="text-lg font-semibold">Mining Rate</h2>
@@ -234,12 +298,12 @@ const MiningPage = () => {
           </div>
 
           {/* Total Balance */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 transform transition-all hover:scale-105">
             <div className="flex items-center gap-2 mb-4">
-              <Award className="text-purple-400" />
+              <Coins className="text-purple-400" />
               <h2 className="text-lg font-semibold">Total Balance</h2>
             </div>
-            <p className="text-3xl font-bold text-purple-400">
+            <p className="text-3xl font-bold text-purple-400 animate-pulse">
               {userData?.totalCoins || 0} CXAC
             </p>
           </div>
@@ -282,6 +346,9 @@ const MiningPage = () => {
             {cooldownInfo.message}
           </div>
         )}
+
+        {/* Mining Animation Overlay */}
+        {/* {miningStatus && <MiningAnimation />} */}
       </div>
     </div>
   );

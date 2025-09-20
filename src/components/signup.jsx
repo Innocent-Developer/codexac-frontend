@@ -2,12 +2,22 @@ import { useState } from "react";
 import Loader from "./Loader";
 
 const Signup = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    referralCode: ""
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -15,19 +25,40 @@ const Signup = () => {
     setError("");
     setSuccess("");
 
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`https://api.funchatparty.online/api/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Signup failed");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
 
       setSuccess("Account created successfully! You can login now.");
+      // navigate to login page after a short delay
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+        referralCode: ""
+      });
       
     } catch (err) {
-      setError("Signup failed. Try again.");
+      setError(err.message || "Signup failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -61,48 +92,90 @@ const Signup = () => {
             </svg>
           </div>
           <h2 className="text-3xl font-bold mb-6 text-center text-green-400 mt-8 tracking-wide">Sign Up</h2>
-          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-          {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
 
           <div className="mb-5">
-            <label className="block text-green-200 mb-2 font-semibold" htmlFor="username">Username</label>
+            <label className="block text-green-200 mb-2 font-semibold" htmlFor="username">
+              Username
+            </label>
             <input
               id="username"
+              name="username"
               type="text"
               placeholder="Your username"
               className="w-full p-3 rounded-lg bg-gray-800 text-white border border-green-700 focus:border-green-400 focus:ring-2 focus:ring-green-500 outline-none transition"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={formData.username}
+              onChange={handleChange}
               autoComplete="username"
               required
             />
           </div>
+
           <div className="mb-5">
-            <label className="block text-green-200 mb-2 font-semibold" htmlFor="email">Email Address</label>
+            <label className="block text-green-200 mb-2 font-semibold" htmlFor="email">
+              Email Address
+            </label>
             <input
               id="email"
+              name="email"
               type="email"
               placeholder="you@example.com"
               className="w-full p-3 rounded-lg bg-gray-800 text-white border border-green-700 focus:border-green-400 focus:ring-2 focus:ring-green-500 outline-none transition"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               autoComplete="email"
               required
             />
           </div>
-          <div className="mb-6">
-            <label className="block text-green-200 mb-2 font-semibold" htmlFor="password">Password</label>
+
+          <div className="mb-5">
+            <label className="block text-green-200 mb-2 font-semibold" htmlFor="password">
+              Password
+            </label>
             <input
               id="password"
+              name="password"
               type="password"
               placeholder="••••••••"
               className="w-full p-3 rounded-lg bg-gray-800 text-white border border-green-700 focus:border-green-400 focus:ring-2 focus:ring-green-500 outline-none transition"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange}
               autoComplete="new-password"
               required
             />
+            <p className="text-xs text-green-200/60 mt-1">
+              Must be at least 6 characters long
+            </p>
           </div>
+
+          <div className="mb-6">
+            <label className="block text-green-200 mb-2 font-semibold" htmlFor="referralCode">
+              Referral Code <span className="text-green-200/60">(Optional)</span>
+            </label>
+            <input
+              id="referralCode"
+              name="referralCode"
+              type="text"
+              placeholder="Enter referral code"
+              className="w-full p-3 rounded-lg bg-gray-800 text-white border border-green-700 focus:border-green-400 focus:ring-2 focus:ring-green-500 outline-none transition"
+              value={formData.referralCode}
+              onChange={handleChange}
+            />
+            <p className="text-xs text-green-200/60 mt-1">
+              Get 10 CXAC bonus when using a valid referral code
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/20 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-4 p-3 rounded-lg bg-green-500/20 text-green-400 text-sm">
+              {success}
+            </div>
+          )}
 
           <button
             type="submit"

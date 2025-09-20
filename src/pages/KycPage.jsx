@@ -1,35 +1,45 @@
-import { useState, useEffect } from 'react';
-import { Upload, Loader2, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Upload,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  X,
+  ShieldCheck,
+} from "lucide-react";
+import Modal from "../components/model";
 
 const KycPage = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    dateOfBirth: '',
-    address: '',
-    idNumber: '',
-    idType: 'passport',
+    fullName: "",
+    dateOfBirth: "",
+    address: "",
+    idNumber: "",
+    idType: "passport",
   });
-  
+
   const [idDocument, setIdDocument] = useState(null);
   const [livePhoto, setLivePhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [showStartModal, setShowStartModal] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Add preview state for uploaded files
   const [previews, setPreviews] = useState({
     idDocument: null,
-    livePhoto: null
+    livePhoto: null,
   });
 
   // Add new state for upload loading
   const [uploadLoading, setUploadLoading] = useState({
     idDocument: false,
-    livePhoto: false
+    livePhoto: false,
   });
 
   // Get user from localStorage
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
   const uid = user?.user?.uid;
 
   const handleInputChange = (e) => {
@@ -39,27 +49,30 @@ const KycPage = () => {
   // Update the handleFileUpload function
   const handleFileUpload = async (file, type) => {
     try {
-      setUploadLoading(prev => ({ ...prev, [type]: true }));
+      setUploadLoading((prev) => ({ ...prev, [type]: true }));
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
-      const response = await fetch('https://api.chuchuparty.online/upload/file', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        "https://api.chuchuparty.online/upload/file",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       // Check if response is OK and contains valid JSON
-      const contentType = response.headers.get('content-type');
-      if (!response.ok || !contentType?.includes('application/json')) {
+      const contentType = response.headers.get("content-type");
+      if (!response.ok || !contentType?.includes("application/json")) {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       // Validate response data
       if (!data.success || !data.fileUrl) {
-        console.error('Invalid upload response:', data);
-        throw new Error('Invalid response from upload server');
+        console.error("Invalid upload response:", data);
+        throw new Error("Invalid response from upload server");
       }
 
       return data.fileUrl;
@@ -67,7 +80,7 @@ const KycPage = () => {
       console.error(`Upload error for ${type}:`, error);
       throw new Error(`Failed to upload ${type}. Please try again.`);
     } finally {
-      setUploadLoading(prev => ({ ...prev, [type]: false }));
+      setUploadLoading((prev) => ({ ...prev, [type]: false }));
     }
   };
 
@@ -77,13 +90,13 @@ const KycPage = () => {
     if (file) {
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
-      setPreviews(prev => ({
+      setPreviews((prev) => ({
         ...prev,
-        [type]: previewUrl
+        [type]: previewUrl,
       }));
 
       // Set file state
-      if (type === 'idDocument') {
+      if (type === "idDocument") {
         setIdDocument(file);
       } else {
         setLivePhoto(file);
@@ -95,7 +108,7 @@ const KycPage = () => {
   useEffect(() => {
     return () => {
       // Revoke preview URLs to avoid memory leaks
-      Object.values(previews).forEach(url => {
+      Object.values(previews).forEach((url) => {
         if (url) URL.revokeObjectURL(url);
       });
     };
@@ -108,47 +121,62 @@ const KycPage = () => {
 
     try {
       // Validate required fields
-      if (!formData.fullName || !formData.dateOfBirth || !formData.address || 
-          !formData.idNumber || !formData.idType || !idDocument) {
-        throw new Error('All required fields must be provided');
+      if (
+        !formData.fullName ||
+        !formData.dateOfBirth ||
+        !formData.address ||
+        !formData.idNumber ||
+        !formData.idType ||
+        !idDocument
+      ) {
+        throw new Error("All required fields must be provided");
       }
 
       // Upload files first
-      const idDocumentUrl = await handleFileUpload(idDocument, 'ID Document');
-      const livePhotoUrl = livePhoto ? await handleFileUpload(livePhoto, 'Live Photo') : null;
+      const idDocumentUrl = await handleFileUpload(idDocument, "ID Document");
+      const livePhotoUrl = livePhoto
+        ? await handleFileUpload(livePhoto, "Live Photo")
+        : null;
 
       // Submit KYC application
-      const response = await fetch('https://api.funchatparty.online/api/kyc-apply', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({
-          userId: uid,
-          ...formData,
-          idDocumentUrl,
-          livePhotoUrl
-        })
-      });
+      const response = await fetch(
+        "https://api.funchatparty.online/api/kyc-apply",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            userId: uid,
+            ...formData,
+            idDocumentUrl,
+            livePhotoUrl,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 400 && data.message === "KYC application already exists") {
-          throw new Error('You have already submitted a KYC application');
+        if (
+          response.status === 400 &&
+          data.message === "KYC application already exists"
+        ) {
+          throw new Error("You have already submitted a KYC application");
         }
-        throw new Error(data.message || 'KYC application failed');
+        throw new Error(data.message || "KYC application failed");
       }
 
       setSuccess(true);
+      setShowSuccessModal(true);
       // Clear form after success
       setFormData({
-        fullName: '',
-        dateOfBirth: '',
-        address: '',
-        idNumber: '',
-        idType: 'passport'
+        fullName: "",
+        dateOfBirth: "",
+        address: "",
+        idNumber: "",
+        idType: "passport",
       });
       setIdDocument(null);
       setLivePhoto(null);
@@ -162,6 +190,88 @@ const KycPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
+      {/* Welcome Modal */}
+      <Modal isOpen={showStartModal} onClose={() => setShowStartModal(false)}>
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <ShieldCheck size={48} className="text-blue-400" />
+          </div>
+          <h2 className="text-2xl font-bold mb-4">
+            Welcome to KYC Verification
+          </h2>
+          <p className="text-gray-400 mb-6">
+            To enhance your account security and comply with regulations, we
+            need to verify your identity. Please prepare the following:
+          </p>
+          <ul className="text-left text-gray-400 space-y-2 mb-6">
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              Valid government-issued ID
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              Clear photo of your ID document
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              Proof of address (if required)
+            </li>
+          </ul>
+          <button
+            onClick={() => setShowStartModal(false)}
+            className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-semibold transition-all"
+          >
+            Get Started
+          </button>
+        </div>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      >
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <CheckCircle size={48} className="text-green-400" />
+          </div>
+          <h2 className="text-2xl font-bold mb-4">
+            KYC Application Submitted!
+          </h2>
+          <p className="text-gray-400 mb-6">
+            Your KYC application has been successfully submitted. Our team will
+            review your documents and update your verification status within
+            24-48 hours.
+          </p>
+          <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold mb-2">What's Next?</h3>
+            <ul className="text-left text-gray-400 space-y-2">
+              <li className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                We'll review your submitted documents
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                You'll receive an email notification
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                Your account will be updated automatically
+              </li>
+            </ul>
+          </div>
+          <button
+            onClick={() => {
+              setShowSuccessModal(false);
+              window.location.href = "/";
+            }}
+            className="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-semibold transition-all"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </Modal>
+
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">KYC Verification</h1>
@@ -174,7 +284,9 @@ const KycPage = () => {
             <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Full Name</label>
+                <label className="block text-sm text-gray-400 mb-1">
+                  Full Name
+                </label>
                 <input
                   type="text"
                   name="fullName"
@@ -186,7 +298,9 @@ const KycPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
+                <label className="block text-sm text-gray-400 mb-1">
+                  Date of Birth
+                </label>
                 <input
                   type="date"
                   name="dateOfBirth"
@@ -198,7 +312,9 @@ const KycPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Address</label>
+                <label className="block text-sm text-gray-400 mb-1">
+                  Address
+                </label>
                 <textarea
                   name="address"
                   value={formData.address}
@@ -216,7 +332,9 @@ const KycPage = () => {
             <h2 className="text-xl font-semibold mb-4">ID Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">ID Type</label>
+                <label className="block text-sm text-gray-400 mb-1">
+                  ID Type
+                </label>
                 <select
                   name="idType"
                   value={formData.idType}
@@ -231,7 +349,9 @@ const KycPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">ID Number</label>
+                <label className="block text-sm text-gray-400 mb-1">
+                  ID Number
+                </label>
                 <input
                   type="text"
                   name="idNumber"
@@ -252,18 +372,20 @@ const KycPage = () => {
               <div className="space-y-4">
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <label className="block text-sm text-gray-400 mb-3 flex items-center justify-between">
-                    <span>ID Document <span className="text-red-400">*</span></span>
+                    <span>
+                      ID Document <span className="text-red-400">*</span>
+                    </span>
                     {uploadLoading.idDocument && (
                       <Loader2 className="animate-spin" size={16} />
                     )}
                   </label>
-                  
+
                   <div className="relative group">
                     {previews.idDocument ? (
                       <div className="relative">
-                        <img 
-                          src={previews.idDocument} 
-                          alt="ID Preview" 
+                        <img
+                          src={previews.idDocument}
+                          alt="ID Preview"
                           className="w-full h-48 object-cover rounded-lg"
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
@@ -271,7 +393,10 @@ const KycPage = () => {
                             type="button"
                             onClick={() => {
                               setIdDocument(null);
-                              setPreviews(prev => ({ ...prev, idDocument: null }));
+                              setPreviews((prev) => ({
+                                ...prev,
+                                idDocument: null,
+                              }));
                             }}
                             className="p-2 bg-red-500/80 rounded-full hover:bg-red-600/80 transition-colors"
                           >
@@ -283,7 +408,7 @@ const KycPage = () => {
                       <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
                         <input
                           type="file"
-                          onChange={(e) => handleFileChange(e, 'idDocument')}
+                          onChange={(e) => handleFileChange(e, "idDocument")}
                           required
                           accept="image/*"
                           className="hidden"
@@ -320,9 +445,9 @@ const KycPage = () => {
                   <div className="relative group">
                     {previews.livePhoto ? (
                       <div className="relative">
-                        <img 
-                          src={previews.livePhoto} 
-                          alt="Photo Preview" 
+                        <img
+                          src={previews.livePhoto}
+                          alt="Photo Preview"
                           className="w-full h-48 object-cover rounded-lg"
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
@@ -330,7 +455,10 @@ const KycPage = () => {
                             type="button"
                             onClick={() => {
                               setLivePhoto(null);
-                              setPreviews(prev => ({ ...prev, livePhoto: null }));
+                              setPreviews((prev) => ({
+                                ...prev,
+                                livePhoto: null,
+                              }));
                             }}
                             className="p-2 bg-red-500/80 rounded-full hover:bg-red-600/80 transition-colors"
                           >
@@ -342,7 +470,7 @@ const KycPage = () => {
                       <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
                         <input
                           type="file"
-                          onChange={(e) => handleFileChange(e, 'livePhoto')}
+                          onChange={(e) => handleFileChange(e, "livePhoto")}
                           accept="image/*"
                           className="hidden"
                           id="livePhoto"
@@ -379,7 +507,7 @@ const KycPage = () => {
                 Processing...
               </>
             ) : (
-              'Submit KYC Application'
+              "Submit KYC Application"
             )}
           </button>
 
@@ -392,10 +520,11 @@ const KycPage = () => {
           )}
 
           {/* Success Message */}
+          {/* show in popup style  */}
           {success && (
             <div className="bg-green-500/20 text-green-400 p-4 rounded-lg flex items-center gap-2">
               <CheckCircle size={20} />
-              KYC application submitted successfully! We'll review your application shortly.
+              KYC application submitted successfully!
             </div>
           )}
         </form>
